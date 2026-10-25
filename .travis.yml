@@ -1,3 +1,16 @@
 language: node_js
 node_js:
 - '0.10'
+dist: focal
+addons:
+  chrome: stable
+  apt:
+    packages:
+    - php-cli
+script:
+- npm test
+# QUnit suite (test/index.html) in headless Chrome, served by PHP for the ajax tests
+- PHP_CLI_SERVER_WORKERS=8 /usr/bin/php -S 127.0.0.1:8000 -t . > /tmp/php-server.log 2>&1 &
+- nvm install 18
+- npm install --prefix /tmp/browser-runner puppeteer-core@22.15.0
+- NODE_PATH=/tmp/browser-runner/node_modules CHROME_BIN="$(which google-chrome)" node test/run-browser-tests.js http://127.0.0.1:8000/test/index.html ajax attributes callbacks core css data deferred dimensions effects event manipulation offset queue selector serialize support traversing wrap
